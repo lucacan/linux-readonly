@@ -1,8 +1,12 @@
 # linux-readonly
 Some files to make the raspberry pi SD Read-only.
+
 doRPIonPC.sh is executed by passing the device where to save the system (/dev/sda, /dev/sdb .. if adapters are used, /dev/mmcblk0 if connected directly to the PC).
-Before launching the command, copy doRPI.sh file in the same folder.
+
+Before launching the command, copy doRPI.sh and doRPIonPC.config file in the same folder.
+
 The wired and/or wi-fi connections must be configured within the script.
+
 ex:
 doRPIonPC.sh / dev / mmcblk0
 
