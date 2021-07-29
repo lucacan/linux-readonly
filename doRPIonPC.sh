@@ -21,9 +21,9 @@ CP="/usr/bin/cp"
 CHMOD="/usr/bin/chmod"
 ##PARAMETERS
 WIRED_DNS="1.1.1.1"
-WIRED_IP="192.168.1.40"
+WIRED_IP="192.168.2.40"
 WIRED_MASK="255.255.255.0"
-WIRED_GW="192.168.1.1"
+WIRED_GW="192.168.2.100"
 WIFI_SSID="SSID"
 WIFI_PASSWORD="PASSSWORD"
 ISO_LAST="https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip"
@@ -44,7 +44,7 @@ if [ ! -f ./"$ISO_LAST_NAME" ]; then
 fi
 
 #Test sha256
-TESTSHA=$($SHA256SUM $ISO_LAST_NAME | $GREP $ISO_SHA256 )
+#TESTSHA=$($SHA256SUM $ISO_LAST_NAME | $GREP $ISO_SHA256 )
 
 if [ -z "$TESTSHA" ]; then
   $ECHO "SHA256 not correct!"
@@ -57,6 +57,8 @@ else
 fi
 
 $UNZIP $ISO_LAST_NAME
+
+
 
 #Check disk to write
 FDISK_OUT=$(sudo $FDISK -l |$GREP "Disk $DISKTOWRITE")
@@ -79,6 +81,7 @@ read -p "If the partition of $FDISK_OUT are unmount and we can continue press Y 
     $ECHO
     exit 1
   fi
+
 
 $ECHO "the disk where to write is :"
 $ECHO $FDISK_OUT
@@ -112,6 +115,7 @@ read -p "If the data are correctrly copyed and we can continue, press Y :" -n 1 
 
 $SYNC
  
+
 APPODIR="/mnt/myappodir"
 $MKDIR -p $APPODIR
 
@@ -136,23 +140,25 @@ do
     $ECHO "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev">>$WPASF
     $ECHO "update_config=1">>$WPASF
     $ECHO "network={">>$WPASF
-    $ECHO " scan_ssid=1">>w$WPASF
+    $ECHO " scan_ssid=1">>$WPASF
     $ECHO " ssid='$WIFI_SSID'">>$WPASF
     $ECHO " psk='$WIFI_PASSWORD'">>$WPASF
     $ECHO " key_mgmt=WPA-PSK">>$WPASF
     $ECHO "}">>$WPASF
     $CAT $WPASF
-    cd /
-    $SLEEP 5
+    $SLEEP 3
     $UMOUNT $PART 
   fi 
+
 
  if [ ! -z "$PART2" ]; then
     # Part 2 $MOUNT
     $MOUNT $PART $APPODIR
-    #Scrittura dhcpcd
+    #Scrittura dhcpcd non fatta
     #Scrittura /etc/network/
     FILENTERFACE="$APPODIR/etc/network/interfaces"
+    $ECHO "FILEINTERFECE $FILENTERFACE"
+    $ECHO "APPODIR $APPODIR"
     EXISTETH=$($CAT $FILENTERFACE | $GREP 'eth0')
     if [ -z "$EXISTETH" ]; then   
       $ECHO 
@@ -166,16 +172,14 @@ do
       $ECHO "gateway $WIRED_GW" >> $FILENTERFACE
     fi
     $CP doRPI.sh $APPODIR/root/doRPI.sh
+    $ECHO $CHMOD 700 $APPODIR/root/doRPI.sh
     $CHMOD 700 $APPODIR/root/doRPI.sh
     $CAT $FILENTERFACE
     ls $APPODIR   
-    $SLEEP 5
+    $SLEEP 3
     $UMOUNT $PART 
   fi 
 
 done
 
-   $ECHO "SSD ready to use"
-
-
-#echo "aaa" | tee /root/loginst && \ 
+   $ECHO "SSD ready to use" 
